@@ -1,5 +1,6 @@
 const addBtn = document.querySelector('#new-toy-btn')
 const toyForm = document.querySelector('.container')
+const editToyForm = document.querySelector('.container-edit')
 let addToy = false
 
 const toyCollection = document.querySelector("#toy-collection")
@@ -40,18 +41,28 @@ function makeToyCard(toy) {
     updateToy(likesNumber, e.target.dataset.id).then(init);
   });
 
+  const deleteButton = document.createElement("button")
+  deleteButton.className = "delete-btn";
+  deleteButton.textContent = "Delete";
+  deleteButton.addEventListener('click', e => {
+    const parent = e.target.parentNode;
+    deleteToy(parent.dataset.id).then(() => parent.remove()); 
+  });
+
 
   div.appendChild(h2);
   div.appendChild(img);
   div.appendChild(p);
   div.appendChild(button);
+  div.appendChild(deleteButton);
 
   return div;
 }
 
-function showToys(toyArray) {
+function showToys(toys) {
   toyCollection.innerHTML = ""
-  toyArray.map(toy => {
+  let toysSorted = toys.sort((b, a) => parseFloat(a.likes) - parseFloat(b.likes));
+  toysSorted.map(toy => {
     makeToy(toy);
   });
 }
@@ -124,5 +135,21 @@ function updateToy(likes, id) {
     body: JSON.stringify({
       "likes": likes
     })
+  });
+}
+
+function deleteToy(id) {
+  return fetch(`${BASE_URL}/${id}`, {
+    method: "DELETE"
+  })
+}
+
+function editToy(toy, id) {
+  return fetch(`${BASE_URL}/${id}`, {
+    method: "PATCH",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(toy)
   });
 }

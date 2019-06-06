@@ -69,6 +69,19 @@ button:hover {
   width: 80%
 }
 
+.container-edit {
+  padding: 1rem;
+  width: stretch;
+  height: auto;
+  display: none;
+  background: #515DA2;
+  opacity: .8;
+}
+
+.edit-toy-form {
+  width: 80%
+}
+
 .submit {
   position: relative;
   background-color: #e04b52;
