@@ -15,26 +15,26 @@ addBtn.addEventListener("click", () => {
   }
 });
 
-function likeBtn(e) {
-  e.preventDefault();
-
-  const toyId = e.target.parentNode.dataset.id;
-  const toy = toyCollection.querySelector(`div[data-id='${toyId}']`);
-  let likesText = toy.querySelector("p").innerText;
-  const likes = parseInt(likesText.replace(" likes", ""), 10) + 1;
-
-  likesText = likes.toString() + " likes";
-  toy.querySelector("p").innerText = likesText;
-
+function like(toyId, newLikes) {
   const options = {
     method: "PATCH",
-    body: JSON.stringify({ likes: likes }),
+    body: JSON.stringify({ likes: newLikes }),
     headers: {
       "Content-Type": "application/json"
     }
   };
 
   return fetch(`${BASE_URL}/${toyId}`, options);
+}
+
+function deleteToy(toy) {
+  const toyId = toy.dataset.id;
+
+  const options = {
+    method: "DELETE"
+  };
+
+  return fetch(`${BASE_URL}/${toyId}`, options).then;
 }
 
 function newToy(e) {
@@ -66,10 +66,17 @@ function addErrorToDom(err) {
 }
 
 function init() {
-  return fetch(BASE_URL)
-    .then(resp => resp.json())
-    .then(parseToysFromDb);
+  return (
+    fetch(BASE_URL)
+      .then(resp => resp.json())
+      // .then(orderByLikes)
+      .then(parseToysFromDb)
+  );
 }
+
+// function orderByLikes(toysArray) {
+//   toysArray.sort()
+// }
 
 function parseToysFromDb(toys) {
   toys.forEach(toy => {
@@ -84,7 +91,7 @@ function addToyToDom(toy) {
 
 function createToyCard(toy) {
   const div = document.createElement("div");
-  div.class = "card";
+  div.className = "card";
   div.dataset.id = toy.id;
 
   const h2 = document.createElement("h2");
@@ -93,24 +100,37 @@ function createToyCard(toy) {
 
   const img = document.createElement("img");
   img.src = toy.image;
-  img.height = 300;
+  img.className = "toy-avatar";
   div.appendChild(img);
 
   const p = document.createElement("p");
   p.innerText = `${toy.likes} likes`;
   div.appendChild(p);
 
-  const btn = document.createElement("button", likeBtn);
+  const btn = document.createElement("button");
   btn.class = "like-btn";
   btn.innerText = "Like";
-  btn.addEventListener("click", likeBtn);
+  btn.addEventListener("click", e => {
+    const toy = e.target.parentNode;
+    const toyId = parseInt(toy.dataset.id, 10);
+
+    const likes = toy.querySelector("p");
+    const newLikes = parseInt(likes.innerText.replace(" likes", ""), 10) + 1;
+    const likesText = newLikes.toString() + " likes";
+
+    // toy.querySelector("p").innerText = likesText;
+    like(toyId, newLikes).then(() => (likes.innerText = likesText));
+  });
   div.appendChild(btn);
 
-  const deleteBtn = document.createElement("button", deleteBtn);
-  btn.class = "like-btn";
-  btn.innerText = "Like";
-  btn.addEventListener("click", deleteBtn);
-  div.appendChild(btn);
+  const deleteBtn = document.createElement("button");
+  deleteBtn.class = "like-btn";
+  deleteBtn.innerText = "Delete";
+  deleteBtn.addEventListener("click", e => {
+    const toy = e.target.parentNode;
+    deleteToy(toy).then(toy.remove());
+  });
+  div.appendChild(deleteBtn);
 
   return div;
 }
